@@ -4,8 +4,8 @@
 
 This app creates a site about a single bgg collection. It shows play times, best with/good with numbers, and descriptions of the games that are there. This allows people to make choices about what to play when you go to someone's house with dozens or hundreds of games you do not know.
 
-![List of Player Counts][MainPage]
-![List of Games][GameList]
+![List of Player Counts](https://github.com/langford/bgg-list/blob/master/MainPage.png)
+![List of Games](https://github.com/langford/bgg-list/blob/master/GameList.png)
 
 It is written in [Clojure](http://www.braveclojure.com), a modern lisp. bgg-list also requires you have that environment and [lein](http://leiningen.org) installed.
 
