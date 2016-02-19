@@ -1,9 +1,5 @@
 (ns bgg-list.core
-  (:require  [clojure.java.io :as io]
-            [clojure.data.zip.xml :as zx]
-            [clojure.xml :as xml]
-            [clojure.string :as string]
-            [clojure.zip :as zip]
+  (:require [clojure.xml :as xml]
             [clojure.pprint :as pp]
             [clojure.edn :as edn]
             ))
@@ -23,7 +19,6 @@
           (= t "boardgame") :game
           :default :unknown)))
 
-
 (defn deep-game-attributes 
   "dig out the items that are really important about the game" 
   [entry]
@@ -34,11 +29,6 @@
                   (tag-fetch (:tag entry) entry))
         lut (into {} lutlist)]
     lut))
-
-(defn game-player-number-poll 
-  "find the poll item"
-  [entry]
-  (get (deep-game-attributes entry) :poll))
 
 (defn xml-from-raw 
   "get out the xml" 
@@ -106,17 +96,6 @@
       false
       (and (>= rec best) (>= rec n-rec) (not= 0 rec)))))
 
-(defn is-n-rec? 
-  "returns true if nrec is nonzero and the highest alternative"
-  [sp n]
-  (let [item (get-in sp [(str n)])
-        best (get-in item [best-t])
-        rec  (get-in item [rec-t])
-        n-rec (get-in item [n-rec-t])]
-    (if (nil? best)
-      false
-      (and (>= n-rec rec) (>= n-rec best) (not= 0 n-rec)))))
-
 (defn is-at-least-rec? 
   "returns true if nrec is nonzero and the highest alternative"
   [sp n]
@@ -140,8 +119,6 @@
         named     (get game-names objectid)
         thumbnail-src (str "http:" (first (get-in deep [:thumbnail :content])))
         image-src (str "http:" (first (get-in deep [:image :content])))
-        thumb-tag (str "<img src='" thumbnail-src "'></img>")
-        img-tag   (str "<img src='" image-src "'></img>")
         minplayers (get-in deep [:minplayers :attrs :value])
         maxplayers (get-in deep [:maxplayers :attrs :value])
         minplaytime (Integer/parseInt (get-in deep [:minplaytime :attrs :value]))
@@ -150,7 +127,7 @@
         playtime-string (if (= minplaytime maxplaytime)
                           (str minplaytime " minutes")
                           (str minplaytime "-" maxplaytime " minutes"))
-        pretty  (with-out-str (pp/pprint entry))
+        _  (with-out-str (pp/pprint entry))
         sp      (simplify-rec-poll entry)
         poll    (with-out-str (pp/pprint sp ))
         prov-bw        (over-10 is-best? sp)
@@ -196,7 +173,6 @@
         named (first (get-in inner [:name :content]))
         thumb (first (get-in inner [:thumbnail :content]))
         ]
-
     {:objectid objectid
      :name named
      :thumb thumb}))
@@ -234,7 +210,7 @@
   "get the database from bgg" 
   [username]
   (println "Beginning data load...")
-  (def games-with-expacs-uri "https://www.boardgamegeek.com/xmlapi2/collection?username=gte910h&own=1")
+  (def games-with-expacs-uri (str "https://www.boardgamegeek.com/xmlapi2/collection?username=" username "&own=1"))
   (def games-xml (slurp games-with-expacs-uri))
   (println "Game info downloaded, beginning processing...")
   (def collection  (collection-info-from-raw games-xml))
@@ -242,12 +218,15 @@
   (def game-detail-query-string (clojure.string/join "," game-id-list))
   (def game-db-prefix-uri "https://www.boardgamegeek.com/xmlapi2/thing?id=")
   (def game-db-list (xml-from-raw (slurp (str game-db-prefix-uri game-detail-query-string))))
-  (def game-db-inner (->> game-db-list :content))
+  (def game-db-inner (->> game-db-list
+                          :content))
   (def game-name-map (into {} (map #(vector (:objectid %) (:name %)) collection)))
   (def game-db-proto (map-from-game-db-inner game-name-map game-db-inner))
   (println "finished data load.")
   {:game-db     game-db-proto
    :raw-xml     games-xml})
+
+
 
 
 ;; How to get a list of the forum for the game https://www.boardgamegeek.com/xmlapi2/forumlist?type=thing&id=13
@@ -259,13 +238,18 @@
   [db]
   (spit db-file-name (prn-str db)))
 
+
+(defn remove-cache
+  "removing the cache file so it has to be regenerated"
+  []
+  (try (clojure.java.io/delete-file db-file-name)
+       (catch Exception _ nil)))
+
 (defn cached-db-reply 
   "get the cached db" 
   []
-  (try
-    (edn/read-string (slurp db-file-name))
-    (catch Exception e
-      nil)))
+  (try (edn/read-string (slurp db-file-name))
+       (catch Exception _ nil)))
 
 (def db-reply
   (let [c (cached-db-reply)]

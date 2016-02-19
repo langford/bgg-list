@@ -3,6 +3,15 @@
 (use 'bgg-list.view)
 (use 'bgg-list.core)
 
+(defn remove-cache-response
+  "remove the cache from the disk"
+  [_]
+  {:status  200
+   :headers {"Content-Type" "text/html; charset-utf-8"}
+   :body (remove-cache)
+   })
+
+
 (defn all-games-response
   "response for the list of all games"
   []
