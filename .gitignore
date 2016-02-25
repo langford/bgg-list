@@ -1,6 +1,8 @@
 *.swp
 *.swo
 cached.db.edn
+*.iml
+.idea
 /target
 /classes
 /checkouts
