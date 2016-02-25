@@ -12,10 +12,10 @@
 
 (def inject-devmode-html
   (comp
-     (set-attr :class "is-dev")
-     (prepend (html [:script {:type "text/javascript" :src "/js/out/goog/base.js"}]))
-     (prepend (html [:script {:type "text/javascript" :src "/react/react.js"}]))
-     (append  (html [:script {:type "text/javascript"} "goog.require('bgg_list.main')"]))))
+   (set-attr :class "is-dev")
+   (prepend (html [:script {:type "text/javascript" :src "/js/out/goog/base.js"}]))
+   (prepend (html [:script {:type "text/javascript" :src "/react/react.js"}]))
+   (append  (html [:script {:type "text/javascript"} "goog.require('bgg_list.main')"]))))
 
 (defn browser-repl []
   (let [repl-env (weasel/repl-env :ip "0.0.0.0" :port 9001)]
@@ -23,7 +23,7 @@
     (piggieback/cljs-eval repl-env '(in-ns 'bgg-list.core) {})))
 
 (defn start-figwheel []
-  (let [server (fig/start-server { :css-dirs ["resources/public/css"] })
+  (let [server (fig/start-server {:css-dirs ["resources/public/css"]})
         config {:builds [{:id "dev"
                           :source-paths ["env/dev/cljs" "src/cljs"]
                           :compiler {:output-to            "resources/public/js/app.js"

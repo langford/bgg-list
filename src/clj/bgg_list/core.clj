@@ -1,8 +1,7 @@
 (ns bgg-list.core
   (:require [clojure.xml :as xml]
             [clojure.pprint :as pp]
-            [clojure.edn :as edn]
-            ))
+            [clojure.edn :as edn]))
 
 (defn tag-fetch 
   "fetch the tag, related to the item" 
@@ -35,7 +34,6 @@
   [raw]
   (xml/parse (java.io.ByteArrayInputStream. (.getBytes raw))))
 
-
 (defn parse-int 
   "parse out an integer from a string...it's a little lose" 
   [s]
@@ -63,14 +61,12 @@
                                 v (get-in result [:content])]]
                       (do
                         [k (rec-counts v)]))
-        count-map (into {} count-pairs)
-        ]
+        count-map (into {} count-pairs)]
     count-map))
 
 (def best-t "Best")
 (def rec-t  "Recommended")
 (def n-rec-t "Not Recommended")
-
 
 ;todo, make the all 0 case come out alright in the recommendations....
 (defn is-best? 
@@ -109,11 +105,10 @@
         bw     (into #{} (filter #(pred? sp %) master))]
     bw))
 
-
 (defn simplify-game-entry 
   "fish out the intersting information" 
   [game-names entry]
-  (let [ t        (entry-type entry)
+  (let [t        (entry-type entry)
         objectid  (Integer/parseInt (get-in entry [:attrs :id]))
         deep      (deep-game-attributes entry)
         named     (get game-names objectid)
@@ -129,11 +124,11 @@
                           (str minplaytime "-" maxplaytime " minutes"))
         _  (with-out-str (pp/pprint entry))
         sp      (simplify-rec-poll entry)
-        poll    (with-out-str (pp/pprint sp ))
+        poll    (with-out-str (pp/pprint sp))
         prov-bw        (over-10 is-best? sp)
         at-least-r (over-10 is-at-least-rec? sp)
         bw      (if (> (count prov-bw) 0) prov-bw at-least-r) ;;guarentee at least 1 best with
-        ]
+]
     {:type t
      :name named
      :img-uri image-src
@@ -149,30 +144,23 @@
      :players-best-with bw
      :players-at-least-recommended-with at-least-r
      :deep deep
-     :raw entry
-     }))
-
-
-
-
+     :raw entry}))
 
 (defn map-from-taglist 
   "clean up the taglist" 
   [taglist]
   (into {} (for [i (range 0 (count taglist))
                  :let [entry (nth taglist i)
-                       tag (get-in entry [:tag])
-                       ]]
-             (tag-fetch tag entry ))))
+                       tag (get-in entry [:tag])]]
+             (tag-fetch tag entry))))
 
 (defn cleaned-item-from-dirty 
   "get some pieces out are used in display" 
   [dirty]
-  (let [ objectid (Integer/parseInt (get-in dirty [:attrs :objectid]))
+  (let [objectid (Integer/parseInt (get-in dirty [:attrs :objectid]))
         inner    (map-from-taglist (get dirty :content))
         named (first (get-in inner [:name :content]))
-        thumb (first (get-in inner [:thumbnail :content]))
-        ]
+        thumb (first (get-in inner [:thumbnail :content]))]
     {:objectid objectid
      :name named
      :thumb thumb}))
@@ -182,8 +170,7 @@
   [raw]
   (let [xml (xml-from-raw raw)
         items (:content xml)
-        cleaned (map cleaned-item-from-dirty items)
-        ]
+        cleaned (map cleaned-item-from-dirty items)]
     cleaned))
 
 (defn map-from-game-db-inner 
@@ -192,7 +179,7 @@
   (into {} (for [i (range 0 (count db))
                  :let [entry (nth db i)
                        itemid (get-in entry [:attrs :id])
-                       n (Integer/parseInt itemid) ]]
+                       n (Integer/parseInt itemid)]]
              [n (simplify-game-entry game-names entry)])))
 
 (defn good-with 
@@ -204,7 +191,6 @@
   "make the map for the best with information" 
   [n db]
   (map second (filter #(-> (:players-best-with (second %)) (contains? n)) db)))
-
 
 (defn fetch-database 
   "get the database from bgg" 
@@ -226,9 +212,6 @@
   {:game-db     game-db-proto
    :raw-xml     games-xml})
 
-
-
-
 ;; How to get a list of the forum for the game https://www.boardgamegeek.com/xmlapi2/forumlist?type=thing&id=13
 ;; How to get the rules forum https://www.boardgamegeek.com/xmlapi2/forum?id=1508&page=0 pages start indexing from 1, and you can figure out the number of pages from the first call to this url (page size 50)
 
@@ -237,7 +220,6 @@
   "save the db" 
   [db]
   (spit db-file-name (prn-str db)))
-
 
 (defn remove-cache
   "removing the cache file so it has to be regenerated"
@@ -261,8 +243,4 @@
 
 (def game-db    (:game-db db-reply))
 (def games-xml  (:raw-xml db-reply))
-
-
-
-
 

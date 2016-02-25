@@ -1,13 +1,12 @@
 (ns bgg-list.server
   (:require 
-            [bgg-list.dev :refer [is-dev? inject-devmode-html browser-repl start-figwheel]]
-            [net.cgrand.enlive-html :refer [deftemplate]]
-            [net.cgrand.reload :refer [auto-reload]]
-            [ring.middleware.reload :as reload]
-            [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
-            [environ.core :refer [env]]
-            [ring.adapter.jetty :refer [run-jetty]]
-            ))
+   [bgg-list.dev :refer [is-dev? inject-devmode-html browser-repl start-figwheel]]
+   [net.cgrand.enlive-html :refer [deftemplate]]
+   [net.cgrand.reload :refer [auto-reload]]
+   [ring.middleware.reload :as reload]
+   [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
+   [environ.core :refer [env]]
+   [ring.adapter.jetty :refer [run-jetty]]))
 
 (use 'bgg-list.core)
 (use 'bgg-list.routes)

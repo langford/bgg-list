@@ -5,7 +5,6 @@
 (use 'bgg-list.handler)
 (use 'bgg-list.core)
 
-
 (defroutes routes
   (resources "/")
   (GET "/goodwith/:str-n" [str-n] (good-games-with-response (Integer/parseInt str-n)))
@@ -15,6 +14,4 @@
   (GET "/entry/:entry" [entry] (game-entry-response (Integer/parseInt entry)))
   (GET "/" [entry] (homepage-response))
   (resources "/react" {:root "react"}))
-
-
 

@@ -8,14 +8,12 @@
   [_]
   {:status  200
    :headers {"Content-Type" "text/html; charset-utf-8"}
-   :body (remove-cache)
-   })
-
+   :body (remove-cache)})
 
 (defn all-games-response
   "response for the list of all games"
   []
-   {:status 200
+  {:status 200
    :headers {"Content-Type" "text/html; charset-utf-8"}
    :body   (display-cleaned-game-list (collection-info-from-raw games-xml))})
 
@@ -47,6 +45,4 @@
   {:status 200
    :headers {"Content-Type" "text/html; charset-utf-8"}
    :body (render-homepage)})
-
-
 
