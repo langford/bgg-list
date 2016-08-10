@@ -22,7 +22,7 @@
 (defn display-cleaned-item 
   "render a clean item into a string"
   [item]
-  (str "<a href=\"/entry/" (:objectid item) "\">" (:name item) "</a>"))
+  (str "<a href=\"../entry/" (:objectid item) ".html\">" (:name item) "</a>"))
 
 (defn display-cleaned-game-list 
   "show the clean list" 
@@ -53,12 +53,12 @@
 (defn display-simplified-game 
   "render the simple game information" 
   [item]
-  (str "<a href=\"/entry/" (:objectid item) "\">" (:name item) " (" (:pretty-playtime item) ")</a>"))
+  (str "<a href=\"../entry/" (:objectid item) ".html\">" (:name item) " (" (:pretty-playtime item) ")</a>"))
 
 (defn display-desc-game 
   "display a game description" 
   [item]
-  (str "<tr ><td style='padding-bottom: 3em'><img src=\"" (:thumb-uri item) "\" align=\"left\"/><a href=\"/entry/" (:objectid item) "\">" (:name item) " (" (:pretty-playtime item) ")</a><br>" (:description item) "<br>\n\n\n\n"))
+  (str "<tr ><td style='padding-bottom: 3em'><img src=\"" (:thumb-uri item) "\" align=\"left\"/><a href=\"../entry/" (:objectid item) ".html\">" (:name item) " (" (:pretty-playtime item) ")</a><br>" (:description item) "<br>\n\n\n\n"))
 
 (defn render-good-with 
   "show a good with item" 
@@ -91,13 +91,13 @@
 (defn best-with-button 
   "properly format the button for best with" 
   [n]
-  (big-button (str "/bestwith/" n) (if (= n 1) "1 Player" 
+  (big-button (str "bestwith/" n ".html") (if (= n 1) "1 Player" 
                                        (str n " Players"))))
 
 (defn good-with-button 
   "properly format the button for good with" 
   [n]
-  (big-button (str "/goodwith/" n) (if (= n 1) "1 Player" 
+  (big-button (str "goodwith/" n ".html") (if (= n 1) "1 Player" 
                                        (str n " Players"))))
 
 (defn br 
@@ -110,7 +110,7 @@
   []
   (str " <!DOCTYPE html>
        <html lang='en'><head><meta name='viewport' content='width=device-width, initial-scale=1'></head>
-       <body><h1>Michael's Game Library</h1>"
+       <body><h1>Game Library</h1>"
        "<h2>Good With:</h2>"
        (good-with-button 1) (br)
        (good-with-button 2) (br)
@@ -135,3 +135,30 @@
        "<a href='/all-list'>All Games</a>"
        "</body></html>"))
 
+(use 'clojure.java.io)
+(defn write-file
+  "export the file by string"
+  [f s dir]
+  (with-open [wrtr (writer (str dir f))]
+      (.write wrtr s)))
+
+(defn export-static
+  "exports a standard html site to the given directory"
+  [directory]
+  (let [dir (str directory "/")]
+    (write-file "index.html" (render-homepage) dir)
+    (doseq [bw-index (range 1 10)]
+      (write-file (str "/bestwith/" bw-index ".html") 
+                     (render-best-with bw-index game-db) 
+                     dir))
+    (doseq [gw-index (range 1 10)]
+      (write-file (str "/goodwith/" gw-index ".html") 
+                     (render-good-with gw-index game-db) 
+                     dir))
+    (doseq [[k v] game-db]
+      (write-file (str "/entry/" k ".html") 
+                     (render-game-entry (get-in game-db [k]))
+                     dir))))
+
+
+(export-static "/Users/mlangford/Desktop")
