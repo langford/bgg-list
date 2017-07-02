@@ -233,11 +233,22 @@
   (try (edn/read-string (slurp db-file-name))
        (catch Exception _ nil)))
 
+(defn verify-username 
+  "throws exception if the user didn't set one"
+  [username]
+  (let [err  #(throw (Exception. "Please set BGGLIST_USERNAME as an environment variable before running"))]
+   (cond (nil? username) (err)
+         (= "" username) (err)
+         :else username)))
+
+
 (def db-reply
   (let [c (cached-db-reply)]
     (if (not (nil? c))
       c
-      (let [fdb (fetch-database (System/getenv "BGGLIST_USERNAME"))]
+      (let [username (System/getenv "BGGLIST_USERNAME")
+            verified-username (verify-username username)
+            fdb (fetch-database verified-username )]
         (cache-db-reply! fdb)
         fdb))))
 
